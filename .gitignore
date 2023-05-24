@@ -1,0 +1,6 @@
+__pycache__/
+run_tests/
+music_queues
+venv
+dicord.log
+.env

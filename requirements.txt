@@ -1,0 +1,9 @@
+discord.py
+PyNaCl
+python-dotenv
+googleapi
+yt_dlp
+pygal
+svglib
+redditeasy
+pillow
