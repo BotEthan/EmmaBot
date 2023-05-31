@@ -26,11 +26,8 @@ class Admin(commands.Cog):
         """
         Clear some messages away.
 
-        **Usage:**
-            `-clear [amount]`
-        
-        **Arguments:**
-            `amount`: The amount of messages you want to clear. Default is 3.
+        :param discord.Interaction interaction: The context of the command interaction.
+        :param int amount: the amount of messages you wish to clear. Defaults to 3.
         """
         await interaction.response.send_message(content=f"Deleted {amount} messages from {interaction.channel.mention}",ephemeral=True)
         await interaction.channel.purge(limit=(amount+1))
@@ -46,6 +43,13 @@ class Admin(commands.Cog):
     @app_commands.describe(voicechannel="The voice channel you wish to move all to",members="A list of people you specifically want to move")
     @app_commands.checks.has_permissions(administrator=True)
     async def movevoicechannel(self,interaction : discord.Interaction,voicechannel : discord.VoiceChannel,*, members : Optional[str]):
+        """
+        Move a large amount of users to another voice channel
+
+        :param discord.Interaction interaction: The context of the command interaction.
+        :param discord.VoiceChannel voicechannel: The channel you wish to move everyone into
+        :param Optional[str] members: A list of pinged members that you wish to move instead of moving the entire voice channel
+        """
         currentChannel = interaction.user.voice.channel
         if members:
             try:

@@ -1,4 +1,5 @@
 import asyncio
+from math import ceil
 import os
 from PIL import Image,ImageDraw
 import asqlite
@@ -20,6 +21,7 @@ class Utility(commands.Cog):
         self.client = client
         self.my_loop.start()
         self.UpdatePolls.start()
+        self.amount_per_page = 5
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -436,11 +438,10 @@ class Utility(commands.Cog):
             `-disablebirthdays`
         """
         serverID = interaction.guild.id
-        connecntion = connect("./databases/user_birthdays.db")
-        c = connecntion.cursor()
-        c.execute("""UPDATE settings SET activated = 0 WHERE server_id = ?""", (serverID,))
-        connecntion.commit()
-        connecntion.close()
+        async with asqlite.connect("./databases/user_birthdays.db") as connection:
+            async with connection.cursor() as c:
+                c.execute("""UPDATE settings SET activated = 0 WHERE server_id = ?""", (serverID,))
+                connection.commit()
         embedEnableBirthdays = discord.Embed(colour=discord.Colour.blurple())
         embedEnableBirthdays.title = f"Birthday notifications are now disabled"
         await interaction.response.send_message(embed=embedEnableBirthdays)
@@ -463,18 +464,16 @@ class Utility(commands.Cog):
         """
         channelID = channel.id
         serverID = interaction.guild.id
-        connecntion = connect("./databases/user_birthdays.db")
-        c = connecntion.cursor()
-        c.execute("""SELECT * FROM settings WHERE server_id = ?""",(serverID,))
-        results = c.fetchone()
-        if results == None:
-            c.execute("""INSERT INTO settings (server_id, channel_id, activated) VALUES (?,?,?))""",(serverID,channelID,1))
-            connecntion.commit()
-            connecntion.close()
-        else:
-            c.execute("""UPDATE settings SET channel_id = ?, activated = 1 WHERE server_id = ?""", (channelID,serverID))
-            connecntion.commit()
-            connecntion.close()
+        async with asqlite.connect("./databases/user_birthdays.db") as connection:
+            async with connection.cursor() as c:
+                c.execute("""SELECT * FROM settings WHERE server_id = ?""",(serverID,))
+                results = c.fetchone()
+                if results == None:
+                    c.execute("""INSERT INTO settings (server_id, channel_id, activated) VALUES (?,?,?))""",(serverID,channelID,1))
+                    connection.commit()
+                else:
+                    c.execute("""UPDATE settings SET channel_id = ?, activated = 1 WHERE server_id = ?""", (channelID,serverID))
+                    connection.commit()
         embedEnableBirthdays = discord.Embed(colour=discord.Colour.blurple())
         embedEnableBirthdays.title = "Success!"
         embedEnableBirthdays.description = f"Birthday notifications are now enabled and will be sent to {channel.mention}!"
@@ -835,11 +834,87 @@ class Utility(commands.Cog):
     @app_commands.command(description="List all of the emojis that the server has along with it's id")
     @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def listemojis(self, interaction : discord.Interaction):
+        await interaction.response.defer()
         serverObject = interaction.guild
-        embedEmoji = discord.Embed(colour=discord.Colour.random(),title=f"Emojis for {serverObject.name}")
-        for emoji in serverObject.emojis:
-            embedEmoji.add_field(name=emoji.name,value=f"Emoji: {emoji}\nID: {emoji.id}\nItem ID: \{emoji}")
-        await interaction.response.send_message(embed=embedEmoji)
+        embedCurrentEmoji = discord.Embed(colour=discord.Colour.random(),title=f"Emojis for {serverObject.name}")
+        currentEmoji = ""
+        page = 1
+        amountOfPages = ceil(len(serverObject.emojis) / self.amount_per_page)
+
+        async def buttonLeftCallback(interaction : discord.Interaction):
+            currentEmoji = ""
+            nonlocal page
+            nonlocal amountOfPages
+            nonlocal embedCurrentEmoji
+            if page == 1:
+                page = amountOfPages
+                startIndex = (amountOfPages - 1) * self.amount_per_page
+                for i in range(startIndex,len(serverObject.emojis)):
+                    currentEmoji += f"{serverObject.emojis[i].name}: {serverObject.emojis[i]}\nID: {serverObject.emojis[i].id}\nItem ID: \{serverObject.emojis[i]}" + "\n"
+            else:
+                page -= 1
+                endIndex = (page * self.amount_per_page)
+                startIndex = endIndex - self.amount_per_page
+                for i in range(startIndex,endIndex):
+                    currentEmoji += f"{serverObject.emojis[i].name}: {serverObject.emojis[i]}\nID: {serverObject.emojis[i].id}\nItem ID: \{serverObject.emojis[i]}" + "\n"
+                
+            embedCurrentEmoji.remove_field(0)
+            embedCurrentEmoji.add_field(name="Emoji",value=currentEmoji)
+            embedCurrentEmoji.set_footer(text=f"Page {page} of {amountOfPages}")
+            await interaction.response.edit_message(embed=embedCurrentEmoji)
+        
+        async def buttonRightCallback(interaction : discord.Interaction):
+            currentEmoji = ""
+            nonlocal page
+            nonlocal amountOfPages
+            nonlocal embedCurrentEmoji
+            if page == amountOfPages:
+                print("Going to page 1")
+                page = 1
+                startIndex = 0
+                endIndex = startIndex + self.amount_per_page
+                for i in range(startIndex,endIndex):
+                    currentEmoji += f"{serverObject.emojis[i].name}: {serverObject.emojis[i]}\nID: {serverObject.emojis[i].id}\nItem ID: \{serverObject.emojis[i]}" + "\n"
+            elif page == amountOfPages - 1:
+                print("Going to last page")
+                page += 1
+                startIndex = (page - 1) * self.amount_per_page
+                for i in range(startIndex,len(serverObject.emojis)):
+                    currentEmoji += f"{serverObject.emojis[i].name}: {serverObject.emojis[i]}\nID: {serverObject.emojis[i].id}\nItem ID: \{serverObject.emojis[i]}" + "\n"
+            else:
+                print("Going to else")
+                page += 1
+                endIndex = page * self.amount_per_page
+                startIndex = endIndex - self.amount_per_page
+                for i in range(startIndex,endIndex):
+                    currentEmoji += f"{serverObject.emojis[i].name}: {serverObject.emojis[i]}\nID: {serverObject.emojis[i].id}\nItem ID: \{serverObject.emojis[i]}" + "\n"
+            
+            embedCurrentEmoji.remove_field(0)
+            embedCurrentEmoji.add_field(name="Emoji",value=currentEmoji)
+            embedCurrentEmoji.set_footer(text=f"Page {page} of {amountOfPages}")
+            await interaction.response.edit_message(embed=embedCurrentEmoji)
+
+        for i in range(len(serverObject.emojis)):
+            if i < self.amount_per_page:
+                currentEmoji += f"{serverObject.emojis[i].name}: {serverObject.emojis[i]}\nID: {serverObject.emojis[i].id}\nItem ID: \{serverObject.emojis[i]}" + "\n"
+            else:
+                break
+
+        currentEmoji.rstrip("\n")
+        embedCurrentEmoji.add_field(name="Emoji",value=currentEmoji)
+        embedCurrentEmoji.set_footer(text=f"Page {page} of {amountOfPages}")
+        if amountOfPages > 1:
+            print("More than one page")
+            leftButton = discord.ui.Button(style=discord.ButtonStyle.grey, label="Previous Page")
+            leftButton.callback = buttonLeftCallback
+            rightButton = discord.ui.Button(style=discord.ButtonStyle.grey, label="Next Page")
+            rightButton.callback = buttonRightCallback
+            view = discord.ui.View()
+            view.add_item(leftButton)
+            view.add_item(rightButton)
+            message = await interaction.followup.send(embed=embedCurrentEmoji,view=view)
+        else:
+            message = await interaction.followup.send(embed=embedCurrentEmoji)
 
 #-----------------------------------------------------------
 
@@ -848,13 +923,86 @@ class Utility(commands.Cog):
     @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.checks.has_permissions(administrator=True)
     async def listroles(self, interaction : discord.Interaction):
+        await interaction.response.defer()
         serverObject = interaction.guild
-        embedRoles = discord.Embed(colour=discord.Colour.random(),title=f"Roles for {serverObject.name}")
-        for role in serverObject.roles:
-            if role.name == "@everyone":
-                continue
-            embedRoles.add_field(name=role.name,value=f"Role Mention: {role.mention}\nID: {role.id}\nItem ID: \{role.mention}",inline=False)
-        await interaction.response.send_message(embed=embedRoles)
+        embedCurrentRoles = discord.Embed(colour=discord.Colour.random(),title=f"Roles for {serverObject.name}")
+        currentRole = ""
+        page = 1
+        amountOfPages = ceil(len(serverObject.roles) / self.amount_per_page)
+
+        async def buttonLeftCallback(interaction : discord.Interaction):
+            currentRole = ""
+            nonlocal page
+            nonlocal amountOfPages
+            nonlocal embedCurrentRoles
+            if page == 1:
+                page = amountOfPages
+                startIndex = (amountOfPages - 1) * self.amount_per_page
+                for i in range(startIndex,len(serverObject.roles)):
+                    currentRole += f"{serverObject.roles[i].name}: {serverObject.roles[i].mention}\nID: {serverObject.roles[i].id}\nItem ID: \{serverObject.roles[i].mention}" + "\n"
+            else:
+                page -= 1
+                endIndex = (page * self.amount_per_page)
+                startIndex = endIndex - self.amount_per_page
+                for i in range(startIndex,endIndex):
+                    currentRole += f"{serverObject.roles[i].name}: {serverObject.roles[i].mention}\nID: {serverObject.roles[i].id}\nItem ID: \{serverObject.roles[i].mention}" + "\n"                
+            embedCurrentRoles.remove_field(0)
+            embedCurrentRoles.add_field(name="Emoji",value=currentRole)
+            embedCurrentRoles.set_footer(text=f"Page {page} of {amountOfPages}")
+            await interaction.response.edit_message(embed=embedCurrentRoles)
+        
+        async def buttonRightCallback(interaction : discord.Interaction):
+            currentRole = ""
+            nonlocal page
+            nonlocal amountOfPages
+            nonlocal embedCurrentRoles
+            if page == amountOfPages:
+                print("Going to page 1")
+                page = 1
+                startIndex = 0
+                endIndex = startIndex + self.amount_per_page
+                for i in range(startIndex,endIndex):
+                    currentRole += f"{serverObject.roles[i].name}: {serverObject.roles[i].mention}\nID: {serverObject.roles[i].id}\nItem ID: \{serverObject.roles[i].mention}" + "\n"                
+            elif page == amountOfPages - 1:
+                print("Going to last page")
+                page += 1
+                startIndex = (page - 1) * self.amount_per_page
+                for i in range(startIndex,len(serverObject.roles)):
+                    currentRole += f"{serverObject.roles[i].name}: {serverObject.roles[i].mention}\nID: {serverObject.roles[i].id}\nItem ID: \{serverObject.roles[i].mention}" + "\n"                
+            else:
+                print("Going to else")
+                page += 1
+                endIndex = page * self.amount_per_page
+                startIndex = endIndex - self.amount_per_page
+                for i in range(startIndex,endIndex):
+                    currentRole += f"{serverObject.roles[i].name}: {serverObject.roles[i].mention}\nID: {serverObject.roles[i].id}\nItem ID: \{serverObject.roles[i].mention}" + "\n"                
+            
+            embedCurrentRoles.remove_field(0)
+            embedCurrentRoles.add_field(name="Emoji",value=currentRole)
+            embedCurrentRoles.set_footer(text=f"Page {page} of {amountOfPages}")
+            await interaction.response.edit_message(embed=embedCurrentRoles)
+
+        for i in range(len(serverObject.roles)):
+            if i < self.amount_per_page:
+                currentRole += f"{serverObject.roles[i].name}: {serverObject.roles[i].mention}\nID: {serverObject.roles[i].id}\nItem ID: \{serverObject.roles[i].mention}" + "\n"                
+            else:
+                break
+
+        currentRole.rstrip("\n")
+        embedCurrentRoles.add_field(name="Emoji",value=currentRole)
+        embedCurrentRoles.set_footer(text=f"Page {page} of {amountOfPages}")
+        if amountOfPages > 1:
+            print("More than one page")
+            leftButton = discord.ui.Button(style=discord.ButtonStyle.grey, label="Previous Page")
+            leftButton.callback = buttonLeftCallback
+            rightButton = discord.ui.Button(style=discord.ButtonStyle.grey, label="Next Page")
+            rightButton.callback = buttonRightCallback
+            view = discord.ui.View()
+            view.add_item(leftButton)
+            view.add_item(rightButton)
+            message = await interaction.followup.send(embed=embedCurrentRoles,view=view)
+        else:
+            message = await interaction.followup.send(embed=embedCurrentRoles)
 
 #-----------------------------------------------------------
 

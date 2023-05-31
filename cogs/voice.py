@@ -68,13 +68,7 @@ class Voice(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild : discord.Guild):
-        async with asqlite.connect("./databases/music_queue.db") as connection:
-            async with connection.cursor() as c:
-                await c.execute("""SELECT * FROM music_settings WHERE server_id = ?""", (guild.id))
-                results = await c.fetchone()
-                if results == None:
-                    await c.execute("""INSERT INTO music_settings VALUES (?,?,?,?)""", (guild.id,100,0,None))
-                    await connection.commit()
+        pass
 
 #-----------------------------------------------------------
 
@@ -154,44 +148,60 @@ class Voice(commands.Cog):
     @app_commands.command(description="Play something or add it queue")
     @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def play(self,interaction : discord.Interaction, search : str):
-        #Get the bot into the channel
-        embed = await self.join_voice(interaction)
+        embed = None
+        defered = False
+        #Check that the user is in voice channel
+        if interaction.user.voice.channel == None:
+            embed_not_in_vc = discord.Embed(colour=discord.Colour.red(), title="Please join a voice channel before using this command.")
+            interaction.response.send_message(embed=embed_not_in_vc)
+            return
+        with self.lock:
+            #Create the k,v pair if its not in the dict
+            if str(interaction.guild.id) not in self.servers_dict:
+                #Get the bot into the channel
+                embed = await self.join_voice(interaction)
         #If there is an embed returned meaning it joined the channel send the embed
         if not embed == None:
             await interaction.response.send_message(embed=embed)
         #If there was no embed returned
         else:
-            #Check that the user is in voice channel
-            if interaction.user.voice.channel == None:
-                return
-            else:
-                await interaction.response.defer()
-
-        with self.lock:
-            #Create the k,v pair if its not in the dict
-            if str(interaction.guild.id) not in self.servers_dict:
-                self.servers_dict[str(interaction.guild.id)] = ServerMusic(interaction.guild)
+            await interaction.response.defer()
+            defered = True
             
-            #Check what the search type is
-            if "playlist" in search or "&list" in search:
-                #Create a playlist unwrapper object to add all of the songs to the queue
-                embed = YTPlaylistUnwrapper(search,self.servers_dict[str(interaction.guild.id)],interaction.user).embed_amount_added
+        #Check what the search type is
+        if "playlist" in search or "&list" in search:
+            #Create a playlist unwrapper object to add all of the songs to the queue
+            embed = YTPlaylistUnwrapper(search,self.servers_dict[str(interaction.guild.id)],interaction.user).embed_amount_added
+            if not defered:
                 #Send an embed to the channel stating how many songs were added
                 await interaction.followup.send(embed=embed)
-                #If this is the first entry into the bot, begin playing the playlist
-                if len(self.servers_dict[str(interaction.guild.id)].get_queue) == 2:
-                    asyncio.create_task(self.servers_dict[str(interaction.guild.id)].play())
-            #If it's not a playlist
             else:
-                #Add a song object to the server's queue
-                embed = self.servers_dict[str(interaction.guild.id)].add_to_queue(YTSongObject(search, interaction.user, str(interaction.guild.id)))
-                print(f"Visual Queue length: {len(self.servers_dict[str(interaction.guild.id)].visual_queue)}")
+                await interaction.response.send_message(embed=embed)
+            #If this is the first entry into the bot, begin playing the playlist
+            if len(self.servers_dict[str(interaction.guild.id)].get_queue) == 2:
+                asyncio.create_task(self.servers_dict[str(interaction.guild.id)].play())
+        #If it's not a playlist
+        else:
+            #Add a song object to the server's queue
+            embed = self.servers_dict[str(interaction.guild.id)].add_to_queue(YTSongObject(search, interaction.user, str(interaction.guild.id)))
+            print(f"Visual Queue length: {len(self.servers_dict[str(interaction.guild.id)].visual_queue)}")
+            if not defered:
                 #If there are songs in the queue already then say the songs been added to the queue
                 if len(self.servers_dict[str(interaction.guild.id)].visual_queue) > 1:
                     await interaction.followup.send(embed=embed)
-                #If this is the first entry into the bot, begin playing the song
-                if len(self.servers_dict[str(interaction.guild.id)].get_queue) == 1:
-                    asyncio.create_task(self.servers_dict[str(interaction.guild.id)].play())
+                else:
+                    embed_loading_song = discord.Embed(colour=discord.Colour.blue(),title="Loading your song!")
+                    await interaction.followup.send(embed=embed_loading_song)
+            else:
+                #If there are songs in the queue already then say the songs been added to the queue
+                if len(self.servers_dict[str(interaction.guild.id)].visual_queue) > 1:
+                    await interaction.response.send_message(embed=embed)
+                else:
+                    embed_loading_song = discord.Embed(colour=discord.Colour.blue(),title="Loading your song!")
+                    await interaction.response.send_message(embed=embed_loading_song)
+            #If this is the first entry into the bot, begin playing the song
+            if len(self.servers_dict[str(interaction.guild.id)].get_queue) == 1:
+                asyncio.create_task(self.servers_dict[str(interaction.guild.id)].play())
 
 #-----------------------------------------------------------
 

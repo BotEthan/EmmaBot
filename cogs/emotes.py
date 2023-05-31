@@ -22,11 +22,8 @@ class Emotes(commands.Cog):
         """
         Let people know you are mad with this command.
 
-        **Usage:**
-            `-angry Optional[Member]`
-        
-        **Arguments:**
-            `member`: A person that you mention
+        :param discord.Interaction interaction: The interaction context of the message
+        :param Optional[discord.Member] member: The person that you're angry at
         """
         username = interaction.user.display_name
         files = ["https://media.giphy.com/media/PjhjAtBWgWfg7Uuewj/giphy.gif",
@@ -50,8 +47,7 @@ class Emotes(commands.Cog):
         """
         Let people know you are blushing with this command.
 
-        **Usage:**
-            `-blush`
+        :param discord.Interaction interaction: The interaction context of the message
         """
         username = interaction.user.display_name
         files = ["https://media.giphy.com/media/LrjU8kGYXDAV9kTZqV/giphy.gif",
@@ -71,8 +67,7 @@ class Emotes(commands.Cog):
         """
         Let people know you are confused with this command.
 
-        **Usage:**
-            `-confused`
+        :param discord.Interaction interaction: The interaction context of the message
         """
         username = interaction.user.display_name
         files = ["https://media.giphy.com/media/kxwswQcCHd8khvE5YB/giphy.gif",
@@ -90,8 +85,7 @@ class Emotes(commands.Cog):
         """
         Let people know you are crying with this command.
 
-        **Usage:**
-            `-cry`
+        :param discord.Interaction interaction: The interaction context of the message
         """
         username = interaction.user.display_name
         files = ["https://media.giphy.com/media/2JVkxXoEamKPpvHYlP/giphy.gif",
@@ -106,15 +100,12 @@ class Emotes(commands.Cog):
     @app_commands.command(description="Let people know you are fighting with someone with this command.")
     @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.describe(member="A person that you mention")
-    async def hit(self,interaction : discord.Interaction,member : discord.Member):
+    async def hit(self, interaction : discord.Interaction, member : discord.Member):
         """
         Let people know you are fighting with someone with this command.
 
-        **Usage:**
-            `-hit Optional[Member]`
-        
-        **Arguments:**
-            `member`: A person that you mention
+        :param discord.Interaction interaction: The interaction context of the message
+        :param discord.Member member: The person that you wish to hit
         """
         username = interaction.user.display_name
         files = ["https://media.giphy.com/media/Lc0P5azCK0JbaywNp1/giphy.gif",
@@ -137,11 +128,8 @@ class Emotes(commands.Cog):
         """
         Let people know you are hugging someone with this command.
 
-        **Usage:**
-            `-hug Optional[Member]`
-        
-        **Arguments:**
-            `member`: A person that you mention
+        :param discord.Interaction interaction: The interaction context of the message
+        :param Optional[discord.Member] member: The person that you wish to hug
         """
         username = interaction.user.display_name
         files = ["https://media.giphy.com/media/HaAbFJBM6kqzoYeNpS/giphy.gif",
@@ -163,11 +151,8 @@ class Emotes(commands.Cog):
         """
         Let people know you are laughing with this command.
 
-        **Usage:**
-            `-laugh Optional[Member]`
-        
-        **Arguments:**
-            `member`: A person that you mention
+        :param discord.Interaction interaction: The interaction context of the message
+        :param Optional[discord.Member] member: The person that you're laughing at or with
         """
         username = interaction.user.display_name
         files = ["https://media.giphy.com/media/stI3O70wGemn0B8SFS/giphy.gif",
@@ -190,11 +175,8 @@ class Emotes(commands.Cog):
         """
         Let people know you are thinking lewd thoughts with this command.
 
-        **Usage:**
-            `-lewd Optional[Member]`
-        
-        **Arguments:**
-            `member`: A person that you mention
+        :param discord.Interaction interaction: The interaction context of the message
+        :param Optional[discord.Member] member: The person that you're being lewd with
         """
         username = interaction.user.display_name
         files = ["https://media.giphy.com/media/IRTWvrl0OX0vBI81kz/giphy.gif",
@@ -215,15 +197,12 @@ class Emotes(commands.Cog):
     @app_commands.command(description="Let people know you are petting someone with this command.")
     @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.describe(member="A person that you mention")
-    async def pet(self,interaction : discord.Interaction,member : discord.Member):
+    async def pet(self, interaction : discord.Interaction, member : discord.Member):
         """
         Let people know you are petting someone with this command.
 
-        **Usage:**
-            `-pet Optional[Member]`
-        
-        **Arguments:**
-            `member`: A person that you mention
+        :param discord.Interaction interaction: The interaction context of the message
+        :param discord.Member member: The person that you're petting
         """
         username = interaction.user.display_name
         files = ["https://media.giphy.com/media/kx044uERaEJ18AyuxO/giphy.gif",
@@ -248,8 +227,7 @@ class Emotes(commands.Cog):
         """
         Let people know you are pouting with this command.
 
-        **Usage:**
-            `-pout`
+        :param discord.Interaction interaction: The interaction context of the message
         """
         username = interaction.user.display_name
         files = ["https://media.giphy.com/media/8puKwJmGeryCAsPSI6/giphy.gif",
@@ -269,11 +247,8 @@ class Emotes(commands.Cog):
         """
         Let people know you are smiling with this command.
 
-        **Usage:**
-            `-smile Optional[Member]`
-        
-        **Arguments:**
-            `member`: A person that you mention
+        :param discord.Interaction interaction: The interaction context of the message
+        :param Optional[discord.Member] member: The person that you're smiling at
         """
         username = interaction.user.display_name
         files = ["https://media.giphy.com/media/6q0WShKRhW2EbfwjOx/giphy.gif",
@@ -304,11 +279,8 @@ class Emotes(commands.Cog):
         """
         Let people know you are waving with this command.
 
-        **Usage:**
-            `-wave Optional[Member]`
-        
-        **Arguments:**
-            `member`: A person that you mention
+        :param discord.Interaction interaction: The interaction context of the message
+        :param Optional[discord.Member] member: The person that you're waving to
         """
         username = interaction.user.display_name
         files = ["https://media.giphy.com/media/iuvRKADgBMXfqrfgdI/giphy.gif",

@@ -109,7 +109,7 @@ class TwitchYoutube(commands.Cog):
         await interaction.response.send_message(embed=embed_subscribed_channels)
 
     
-    @tasks.loop(minutes=10)
+    @tasks.loop(minutes=20)
     async def check_channels(self):
         async with asqlite.connect("./databases/twitchyoutube.db") as connection:
             async with connection.cursor() as c:

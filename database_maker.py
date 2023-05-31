@@ -40,15 +40,16 @@ import sqlite3
 #c.execute("""INSERT INTO settings VALUES (819667478158114816, 0, False)""")
 #c.execute("""ALTER TABLE birthdays RENAME TO users""")
 
-with sqlite3.connect("./databases/server_quotes.db") as connection:
-    c = connection.cursor()
-    c.execute("SELECT * FROM quotes")
-    results = c.fetchall()
+# with sqlite3.connect("server_quotes.db") as connection:
+#     c = connection.cursor()
+#     insert_query = "ALTER TABLE quotes ADD COLUMN clip_link TEXT DEFAULT None"
+#     c.execute(insert_query)
+#     connection.commit()
 
-with sqlite3.connect("./databases/temp_quotes.db") as connection:
-    c = connection.cursor()
-    for quote in results:
-        c.execute("INSERT INTO quotes VALUES (?, ?, ?, ?)", (quote[0], quote[1], quote[2], None))
+# with sqlite3.connect("./databases/temp_quotes.db") as connection:
+#     c = connection.cursor()
+#     for quote in results:
+#         c.execute("INSERT INTO quotes VALUES (?, ?, ?, ?)", (quote[0], quote[1], quote[2], None))
 
 
     connection.commit()

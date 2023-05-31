@@ -27,6 +27,13 @@ class Economy(commands.Cog):
     @commands.command(hidden=True)
     @commands.is_owner()
     async def addBalance(self,ctx,member : discord.Member, amount : int):
+        """
+        Add or remove Thonks to or from a user's account.
+
+        :param ctx: The context of the message
+        :param discord.Member member: The member to which you are altering the account of
+        :param int amount: The amount to add or remove from the account
+        """
         if ctx.author.id == 222224934359793674:
             async with asqlite.connect("./databases/user_info.db") as connection:
                 async with connection.cursor() as c:
@@ -45,11 +52,8 @@ class Economy(commands.Cog):
         """
         Shows the current balance of you or another user.
 
-        **Usage:**
-            `-balance Optional[Member]`
-        
-        **Arguments:**
-            `member`: A person that you mention
+        :param discord.Interaction interaction: The interaction context of the message
+        :param Union[None, discord.Member] member: The member you wish to see the balance of. Set to None if no one is given
         """
         if member == None:
             member = interaction.user
@@ -78,8 +82,9 @@ class Economy(commands.Cog):
         """
         Beg for some money.
 
-        **Usage:**
-            `-beg`
+        :param discord.Interaction interaction: The interaction context of the message
+        
+        :raises app_commands.CommandOnCooldown: When the command has been used recently and is on a cooldown
         """
         authorID = interaction.user.id
         authorName = interaction.user.display_name
@@ -126,6 +131,10 @@ class Economy(commands.Cog):
     @app_commands.command(description="Shows the leaderboard for the highest amount of thonks")
     @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def leaderboard(self, interaction : discord.Interaction):
+        """Check the leaderboard for who has the highest amount of Thonks
+        
+        :param discord.Interaction interaction: The interaction context of the message
+        """
         serverObject = interaction.guild
         async with asqlite.connect("./databases/user_info.db") as connection:
             async with connection.cursor() as c:
@@ -165,12 +174,9 @@ class Economy(commands.Cog):
         """
         Give someone some money. Well aren't you charitable.
 
-        **Usage:**
-            `-give [Member] [Amount]`
-        
-        **Arguments:**
-            `member`: A person that you mention
-            `amount`: The amount of money you wish to give
+        :param discord.Interaction interaction: The interaction context of the message
+        :param discord.Member member: The person you wish to give Thonks to
+        :param int amount: The amount of Thonks you wish to give
         """
         authorID = interaction.user.id
         authorName = interaction.user.display_name
@@ -225,7 +231,7 @@ class Economy(commands.Cog):
     def StealReset(interaction : discord.Interaction):
         return app_commands.Cooldown(1,3600)
 
-    @app_commands.command(description="Try and steal some money from someone. Ooo he stealin'! Rehash")
+    @app_commands.command(description="Try and steal some money from someone. Ooo he stealin'!")
     @app_commands.describe(member="The member you wish to steal from.")
     @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.checks.dynamic_cooldown(factory=StealReset, key=lambda i: (i.guild_id, i.user.id))
@@ -233,11 +239,10 @@ class Economy(commands.Cog):
         """
         Try and steal some money from someone. Ooo he stealin'!
 
-        **Usage:**
-            `-steal [Member]`
-        
-        **Arguments:**
-            `member`: A person that you mention
+        :param discord.Interaction interaction: The interaction context of the message
+        :param discord.Member member: The persony you wish to steal from
+
+        :raises app_commands.CommandOnCooldown: When the command has already been used recently and is on cooldown
         """
         def check(m):
             return m.author == member and m.content.upper() == "STOP! THIEF"

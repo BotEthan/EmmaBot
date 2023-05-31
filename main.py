@@ -190,14 +190,12 @@ async def sync(ctx: commands.Context, guilds: commands.Greedy[discord.Object], s
 
 #For loading cogs
 @client.command(hidden=True)
+@commands.is_owner()
 async def load(ctx, extension):
     """
     Loads a cog
     """
     user = ctx.author.id
-    if not str(user) in allowed_resetters:
-        await ctx.send('Only the bot developer and trusted users may use this command')
-        return
     if extension == "all":
         for filename in os.listdir('./cogs'):
             if filename.endswith('.py'):
@@ -210,14 +208,12 @@ async def load(ctx, extension):
     await ctx.send(embed=embed)
 
 @client.command(aliases=["rload"], hidden=True)
+@commands.is_owner()
 async def reload(ctx, extension):
     """
     Reloads a cog
     """
     user = ctx.author.id
-    if not str(user) in allowed_resetters:
-        await ctx.send('Only the bot developer and trusted users may use this command')
-        return
     if extension == "all":
         for filename in os.listdir('./cogs'):
             if filename.endswith('.py'):
@@ -233,8 +229,6 @@ async def reload(ctx, extension):
 async def ChangeStatus():
     print("Changing status")
     await client.change_presence(status=discord.Status.online, activity=discord.Streaming(name=random.choice(status),url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"))
-
-allowed_resetters = ["222224934359793674"]
 
 print("Getting Token")
 TOKEN = get_token(args.bot)
