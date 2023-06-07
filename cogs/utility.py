@@ -63,12 +63,16 @@ class Utility(commands.Cog):
                 await c.execute("""SELECT * FROM reactions WHERE server_id = ?""",(payload.guild_id,))
                 result = await c.fetchall()
         for reactionRole in result:
+            reaction_emoji = reactionRole[3]
             print(str(payload.message_id))
+            if ":" in reactionRole[3]:
+                reaction_emoji = str(reactionRole[3].split(":")[2])
+                reaction_emoji = reaction_emoji[:-1]
             if reactionRole[2] == payload.message_id:
                 print("Found the message")
                 try:
-                    print(f"{reactionRole[3]}\n{reactionRole[3] == payload.emoji.name}")
-                    if reactionRole[3] == payload.emoji.name:
+                    print(f"{reaction_emoji}\n{reactionRole[3] == payload.emoji.name}")
+                    if reaction_emoji == payload.emoji.name:
                         print("Found the emoji in emoji.name")
                         if reactionRole[5] == 0 or reactionRole[5] == 2:
                             guildObject = self.client.get_guild(payload.guild_id)
@@ -84,7 +88,7 @@ class Utility(commands.Cog):
                             embedRemovedRole = discord.Embed(colour=discord.Colour.teal())
                             embedRemovedRole.title = f"Successfully removed the {roleToRemove.name} role."
                             await payload.member.send(embed=embedRemovedRole)
-                    elif int(reactionRole[3]) == payload.emoji.id:
+                    elif int(reaction_emoji) == payload.emoji.id:
                         print("Found the emoji")
                         if reactionRole[5] == 0 or reactionRole[5] == 2:
                             guildObject = self.client.get_guild(payload.guild_id)
@@ -100,45 +104,49 @@ class Utility(commands.Cog):
                             embedRemovedRole = discord.Embed(colour=discord.Colour.teal())
                             embedRemovedRole.title = f"Successfully removed the {roleToRemove.name} role."
                             await payload.member.send(embed=embedRemovedRole)
-                except:
-                    print("There was a problem giving the role")
-        async with asqlite.connect("./databases/polls.db") as connection:
-            async with connection.cursor() as c:
-                query = f"SELECT * FROM a{payload.guild_id}"
-                await c.execute(query)
-                results = await c.fetchall()
-        for poll in results:
-            if poll[2] == payload.message_id:
-                reactions = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣"]
-                choices = poll[6].split(",")
-                print(choices)
-                if poll[5].lower() == "line":
-                    votes = ast.literal_eval(poll[7])
-                    for i in range(len(choices)):
-                        if str(payload.emoji) == reactions[i]:
-                            print(votes[i])
-                            votes[i].append(votes[i][len(votes[i]) - 1] + 1)
-                            print(f"Adding 1 to {choices[i]}")
-                    async with asqlite.connect("./databases/polls.db") as connection:
-                        async with connection.cursor() as c:
-                            query = f"UPDATE a{payload.guild_id} SET votes = ? WHERE poll_id = ?"
-                            await c.execute(query,(",".join(str(v) for v in votes),poll[3]))
-                            await connection.commit()
-                else:
-                    votes = poll[7].split(",")
-                    print(votes)
-                    for i in range(len(choices)):
-                        if str(payload.emoji) == reactions[i]:
-                            votes[i] = str(int(votes[i]) + 1)
-                            print(f"Adding 1 to {choices[i]}")
-                    print(f"Before join {votes}")
-                    votes = ",".join(votes)
-                    print(f"after join {votes}")
-                    async with asqlite.connect("./databases/polls.db") as connection:
-                        async with connection.cursor() as c:
-                            query = f"UPDATE a{payload.guild_id} SET votes = ? WHERE poll_id = ?"
-                            await c.execute(query,(votes,poll[3]))
-                            await connection.commit()
+                except Exception as e:
+                    print("LOG: There was a problem giving the role")
+                    print(f"ERROR: Role Error:\n{e}")
+        try:
+            async with asqlite.connect("./databases/polls.db") as connection:
+                async with connection.cursor() as c:
+                    query = f"SELECT * FROM a{payload.guild_id}"
+                    await c.execute(query)
+                    results = await c.fetchall()
+            for poll in results:
+                if poll[2] == payload.message_id:
+                    reactions = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣"]
+                    choices = poll[6].split(",")
+                    print(choices)
+                    if poll[5].lower() == "line":
+                        votes = ast.literal_eval(poll[7])
+                        for i in range(len(choices)):
+                            if str(payload.emoji) == reactions[i]:
+                                print(votes[i])
+                                votes[i].append(votes[i][len(votes[i]) - 1] + 1)
+                                print(f"Adding 1 to {choices[i]}")
+                        async with asqlite.connect("./databases/polls.db") as connection:
+                            async with connection.cursor() as c:
+                                query = f"UPDATE a{payload.guild_id} SET votes = ? WHERE poll_id = ?"
+                                await c.execute(query,(",".join(str(v) for v in votes),poll[3]))
+                                await connection.commit()
+                    else:
+                        votes = poll[7].split(",")
+                        print(votes)
+                        for i in range(len(choices)):
+                            if str(payload.emoji) == reactions[i]:
+                                votes[i] = str(int(votes[i]) + 1)
+                                print(f"Adding 1 to {choices[i]}")
+                        print(f"Before join {votes}")
+                        votes = ",".join(votes)
+                        print(f"after join {votes}")
+                        async with asqlite.connect("./databases/polls.db") as connection:
+                            async with connection.cursor() as c:
+                                query = f"UPDATE a{payload.guild_id} SET votes = ? WHERE poll_id = ?"
+                                await c.execute(query,(votes,poll[3]))
+                                await connection.commit()
+        except:
+            print("LOG: No poll table found for the server")   
     
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload : discord.RawReactionActionEvent):
@@ -149,11 +157,15 @@ class Utility(commands.Cog):
                 result = await c.fetchall()
         print(result)
         for reactionRole in result:
+            reaction_emoji = reactionRole[3]
+            if ":" in reactionRole[3]:
+                reaction_emoji = str(reactionRole[3].split(":")[2])
+                reaction_emoji = reaction_emoji[:-1]
             print(str(payload.message_id))
             if reactionRole[2] == payload.message_id:
                 print("Found the message")
                 try:
-                    if reactionRole[3] == payload.emoji.name:
+                    if reaction_emoji == payload.emoji.name:
                         print("Found the emoji")
                         if reactionRole[5] == 1 or reactionRole[5] == 2:
                             guildObject = self.client.get_guild(payload.guild_id)
@@ -163,7 +175,7 @@ class Utility(commands.Cog):
                             embedRemovedRole = discord.Embed(colour=discord.Colour.teal())
                             embedRemovedRole.title = f"Successfully removed the {roleToRemove.name} role."
                             await memberObject.send(embed=embedRemovedRole)
-                    elif int(reactionRole[3]) == payload.emoji.id:
+                    elif int(reaction_emoji) == payload.emoji.id:
                         print("Found the emoji")
                         if reactionRole[5] == 1 or reactionRole[5] == 2:
                             guildObject = self.client.get_guild(payload.guild_id)
@@ -175,43 +187,46 @@ class Utility(commands.Cog):
                             await memberObject.send(embed=embedRemovedRole)
                 except:
                     print("There was an error removing the role")
-        async with asqlite.connect("./databases/polls.db") as connection:
-            async with connection.cursor() as c:
-                query = f"SELECT * FROM a{payload.guild_id}"
-                await c.execute(query)
-                results = await c.fetchall()
-        for poll in results:
-            if poll[2] == payload.message_id:
-                reactions = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣"]
-                choices = poll[6].split(",")
-                print(choices)
-                if poll[5].lower() == "line":
-                    votes = ast.literal_eval(poll[7])
-                    for i in range(len(choices)):
-                        if str(payload.emoji) == reactions[i]:
-                            print(votes[i])
-                            votes[i].append(votes[i][len(votes[i]) - 1] - 1)
-                            print(f"Adding 1 to {choices[i]}")
-                    async with asqlite.connect("./databases/polls.db") as connection:
-                        async with connection.cursor() as c:
-                            query = f"UPDATE a{payload.guild_id} SET votes = ? WHERE poll_id = ?"
-                            await c.execute(query,(",".join(str(v) for v in votes),int(poll[3])))
-                            await connection.commit()
-                else:
-                    votes = poll[7].split(",")
-                    print(votes)
-                    for i in range(len(choices)):
-                        if str(payload.emoji) == reactions[i]:
-                            votes[i] = str(int(votes[i]) - 1)
-                            print(f"Adding 1 to {choices[i]}")
-                    print(f"Before join {votes}")
-                    votes = ",".join(votes)
-                    print(f"after join {votes}")
-                    async with asqlite.connect("./databases/polls.db") as connection:
-                        async with connection.cursor() as c:
-                            query = f"UPDATE a{payload.guild_id} SET votes = ? WHERE poll_id = ?"
-                            await c.execute(query,(votes,int(poll[3])))
-                            await connection.commit()
+        try:
+            async with asqlite.connect("./databases/polls.db") as connection:
+                async with connection.cursor() as c:
+                    query = f"SELECT * FROM a{payload.guild_id}"
+                    await c.execute(query)
+                    results = await c.fetchall()
+            for poll in results:
+                if poll[2] == payload.message_id:
+                    reactions = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣"]
+                    choices = poll[6].split(",")
+                    print(choices)
+                    if poll[5].lower() == "line":
+                        votes = ast.literal_eval(poll[7])
+                        for i in range(len(choices)):
+                            if str(payload.emoji) == reactions[i]:
+                                print(votes[i])
+                                votes[i].append(votes[i][len(votes[i]) - 1] - 1)
+                                print(f"Adding 1 to {choices[i]}")
+                        async with asqlite.connect("./databases/polls.db") as connection:
+                            async with connection.cursor() as c:
+                                query = f"UPDATE a{payload.guild_id} SET votes = ? WHERE poll_id = ?"
+                                await c.execute(query,(",".join(str(v) for v in votes),int(poll[3])))
+                                await connection.commit()
+                    else:
+                        votes = poll[7].split(",")
+                        print(votes)
+                        for i in range(len(choices)):
+                            if str(payload.emoji) == reactions[i]:
+                                votes[i] = str(int(votes[i]) - 1)
+                                print(f"Adding 1 to {choices[i]}")
+                        print(f"Before join {votes}")
+                        votes = ",".join(votes)
+                        print(f"after join {votes}")
+                        async with asqlite.connect("./databases/polls.db") as connection:
+                            async with connection.cursor() as c:
+                                query = f"UPDATE a{payload.guild_id} SET votes = ? WHERE poll_id = ?"
+                                await c.execute(query,(votes,int(poll[3])))
+                                await connection.commit()
+        except:
+            print("LOG: No poll table found for the server")                        
 
     @commands.Cog.listener()
     async def on_message(self, message : discord.Message):
@@ -257,7 +272,6 @@ class Utility(commands.Cog):
     #For adding birthdays
     @app_commands.command(name= "addbirthday", description="Add a birthday to the calendar.")
     @app_commands.describe(birthdaydate = "Your birthday date in 'YYYY-MM-DD' format", member = "A member you are setting the birthday of. If you aren't stating a member then it will set it as your birthday")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def addbirthday(self, interaction : discord.Interaction, birthdaydate : str, member : Union[None,discord.Member],):
         """
         Add a birthday to the calendar.
@@ -299,7 +313,6 @@ class Utility(commands.Cog):
     #Show birthdays
     @app_commands.command(description="Show all the birthdays currently on the calendar.")
     @app_commands.describe(viewmode="The specific month you wish to see the birthdays of. If none is given it will default to all of the months.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def birthdays(self,interaction : discord.Interaction,viewmode : str = 'ALL'):
         """
         Show all the birthdays currently on the calendar.
@@ -366,7 +379,6 @@ class Utility(commands.Cog):
 
     # For checking bday notifications
     @app_commands.command(description="Lets you know if the birthday announcements are enabled.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def birthdaystatus(self,interaction : discord.Interaction):
         """
         Lets you know if the birthday announcements are enabled.
@@ -400,7 +412,6 @@ class Utility(commands.Cog):
 
     #For removing birthdays
     @app_commands.command(description="Delete a members birthday from the calendar.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.describe(member= "The member's birthday you wish to delete. Leave blank for yourself")
     async def deletebirthday(self, interaction : discord.Interaction, member : Union[None,discord.Member]):
         """
@@ -428,7 +439,6 @@ class Utility(commands.Cog):
 #-----------------------------------------------------------
 
     @app_commands.command(description="Disables the birthday announcements. By default they are disabled.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.checks.has_permissions(administrator=True)
     async def disablebirthdays(self, interaction : discord.Interaction):
         """
@@ -450,7 +460,6 @@ class Utility(commands.Cog):
 
     @app_commands.command(description="Enable birthday announcements in a given channel.")
     @app_commands.describe(channel= "The channel you wish to have birthday announcements in.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.checks.has_permissions(administrator=True)
     async def enablebirthdays(self, interaction : discord.Interaction, channel : discord.TextChannel):
         """
@@ -484,7 +493,6 @@ class Utility(commands.Cog):
     #For creating an event
     @app_commands.command(description="Create an event to automate channel hiding on various stages")
     @app_commands.describe(eventname= "The specific name of the event",stage1="The list of channels to be available on the first stage",stage2="The list of channels to be available on the second stage",stage3="The list of channels to be available on the third stage")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.checks.has_permissions(administrator=True)
     async def eventcreate(self, interaction : discord.Interaction, eventname : str, stage1 : str, stage2 : Union[None,str], stage3 : Union[None,str]):
         """
@@ -525,7 +533,6 @@ class Utility(commands.Cog):
 
     #For end of event
     @app_commands.command(description="End the current event")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @commands.has_permissions(administrator=True)
     async def eventend(self, interaction : discord.Interaction):
         """
@@ -577,7 +584,6 @@ class Utility(commands.Cog):
 
     #For listing events
     @app_commands.command(description="See the events for the server.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def eventlist(self, interaction : discord.Interaction):
         """
         See the current event as well as all the others available for the server. This will also show the stages channels that are assigned to them.
@@ -627,7 +633,6 @@ class Utility(commands.Cog):
 
     #For next event stage
     @app_commands.command(description="Go to the next stage of the event.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.checks.has_permissions(administrator=True)
     async def eventnext(self, interaction : discord.Interaction):
         """
@@ -693,7 +698,6 @@ class Utility(commands.Cog):
     #For setting the event
     @app_commands.command(description="Set the current event for the server.")
     @app_commands.describe(eventname= "The name of the event to set as active.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.checks.has_permissions(administrator=True)
     async def eventset(self, interaction : discord.Interaction, eventname : str):
         """
@@ -730,7 +734,6 @@ class Utility(commands.Cog):
 
     #For starting the event
     @app_commands.command(description="Kickoff your event by allowing the first stage channels to be visible!")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.checks.has_permissions(administrator=True)
     async def eventstart(self, interaction : discord.Interaction):
         """
@@ -782,7 +785,6 @@ class Utility(commands.Cog):
     #For join role
     @app_commands.command(description="Setup users to receive a role on joining")
     @app_commands.describe(role="The role for the user to receieve when joining")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def joinroles(self,interaction : discord.Interaction, role : Optional[discord.Role]):
         serverID = interaction.guild_id
         async with asqlite.connect("./databases/reaction_info.db") as connection:
@@ -832,7 +834,6 @@ class Utility(commands.Cog):
 #-----------------------------------------------------------
 
     @app_commands.command(description="List all of the emojis that the server has along with it's id")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def listemojis(self, interaction : discord.Interaction):
         await interaction.response.defer()
         serverObject = interaction.guild
@@ -920,7 +921,6 @@ class Utility(commands.Cog):
 
     #For list roles
     @app_commands.command(description="List all of the roles in the server along with it's id")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.checks.has_permissions(administrator=True)
     async def listroles(self, interaction : discord.Interaction):
         await interaction.response.defer()
@@ -1008,7 +1008,6 @@ class Utility(commands.Cog):
 
     #For message react
     @app_commands.command(description="Set up users to get a role based on a message that was sent")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.checks.has_permissions(administrator=True)
     @app_commands.describe(channel = "The channel you're looking for the message in", messagecontent = "The message to look for. Leave none for any message", role = "The role you wish to give to a user.")
     async def messageroleadd(self, interaction : discord.Interaction, channel : discord.TextChannel, messagecontent : Union[None,str], role : discord.Role, nicknamechange : Optional[str], confirmationemoji : Optional[str]):
@@ -1028,7 +1027,6 @@ class Utility(commands.Cog):
 
     #For message react list
     @app_commands.command(description="List all the messages the bot is listening for.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.checks.has_permissions(administrator=True)
     async def messagerolelist(self,interaction : discord.Interaction):
         serverID = interaction.guild_id
@@ -1065,7 +1063,6 @@ class Utility(commands.Cog):
 
     #For message react removal
     @app_commands.command(description="Remove a message role")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.checks.has_permissions(administrator=True)
     async def messageroleremove(self,interaction : discord.Interaction, channel : discord.TextChannel, role : discord.Role):
         serverID = interaction.guild_id
@@ -1086,7 +1083,6 @@ class Utility(commands.Cog):
 
     #For ping
     @app_commands.command(description="Shows the current ping of the bot.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def ping(self, interaction : discord.Interaction):
         """
         Shows the current ping of the bot.
@@ -1100,7 +1096,6 @@ class Utility(commands.Cog):
 
     #For poll creation
     @app_commands.command(description="Create a new poll for the server")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.describe(charttype="Line, Bar, Pie")
     async def pollcreate(self, interaction : discord.Interaction, channel : discord.TextChannel, charttype : str, polltitle : str, style : Optional[str], choice1 : str, choice2 : str, choice3 : Optional[str], choice4 : Optional[str], choice5 : Optional[str], choice6 : Optional[str], choice7 : Optional[str], choice8 : Optional[str]):
         serverID = interaction.guild_id
@@ -1188,7 +1183,6 @@ class Utility(commands.Cog):
 #-----------------------------------------------------------
 
     @app_commands.command(description="End a poll and show the final result.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.checks.has_permissions(administrator=True)
     async def pollend(self, interaction : discord.Interaction, pollid : int):
         await interaction.response.defer()
@@ -1288,7 +1282,6 @@ class Utility(commands.Cog):
 #-----------------------------------------------------------
 
     @app_commands.command(description="List all the currently active polls")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def polllist(self, interaction : discord.Interaction):
         serverID = interaction.guild_id
         async with asqlite.connect("./databases/polls.db") as connection:
@@ -1311,7 +1304,6 @@ class Utility(commands.Cog):
     #For adding reactions
     @app_commands.command(description="Add a reaction that the bot must listen for in order to assign roles.")
     @app_commands.describe(channel="The channel in which the message is sent", messageid= "The ID of the reaction message", emoji="The emoji required for this reaction", role="The discord role to be received",mode="The mode of the reaction. (Toggle,Add,Remove)")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.checks.has_permissions(administrator=True)
     async def reactionroleadd(self, interaction : discord.Interaction, channel : discord.TextChannel, messageid : str, emoji : str, role : discord.Role, mode : str):
         """
@@ -1352,7 +1344,6 @@ class Utility(commands.Cog):
 
     #For showing all reactions currently active
     @app_commands.command(description="Shows all the messages and reactions that the bot is listening for")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.checks.has_permissions(administrator=True)
     async def reactionrolelist(self, interaction : discord.Interaction):
         """
@@ -1460,7 +1451,6 @@ class Utility(commands.Cog):
     #For removing reactions
     @app_commands.command(description="Stop the bot from listening to a message for a reaction")
     @app_commands.describe(messageid = "The ID of the message listening for reactions or 'all' to remove all", emoji= "The emoji to remove the reaction of")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.checks.has_permissions(administrator=True)
     async def reactionroleremove(self, interaction : discord.Interaction, messageid : str, emoji :str = None):
         """
@@ -1505,7 +1495,6 @@ class Utility(commands.Cog):
 
     #For version of bot
     @app_commands.command(description="Shows the current version of the bot.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def version(self, interaction : discord.Interaction):
         """
         Shows the current version of the bot.

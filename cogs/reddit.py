@@ -22,7 +22,6 @@ class Reddit(commands.Cog):
         print('Cog: "Reddit Commands" loaded.')
 
     @app_commands.command(description="mmmmmmm yes meme.....")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def meme(self, interaction : discord.Interaction, subreddit : Union[None,str]):
         """
         Hey kid, you wanna buy some memes?

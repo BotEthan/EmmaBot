@@ -49,7 +49,6 @@ class Fun(commands.Cog):
 
     #For add quote command
     @app_commands.command(description="Add a new quote to the server.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.describe(newquote=R"The quote that you wish to add. Use '\n' to add a new line")
     async def addquote(self,interaction : discord.Interaction, newquote : str, clip_link : Optional[str]):
         """
@@ -71,7 +70,6 @@ class Fun(commands.Cog):
 
 #-----------------------------------------------------------
     @app_commands.command(description="Play some blackjack.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def blackjack(self, interaction : discord.Interaction, bet : Optional[int]):        
         embed_met_bet = await self.check_bet(interaction, bet)
         if not embed_met_bet[0]:
@@ -86,7 +84,6 @@ class Fun(commands.Cog):
 #-----------------------------------------------------------
 
     @app_commands.command(description="Delete a quote")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def deletequote(self, interaction : discord.Interaction):
         await interaction.response.defer()
         serverID = interaction.guild_id
@@ -197,7 +194,6 @@ class Fun(commands.Cog):
 
     #For edit quote command
     @app_commands.command(description="Edit a quote that was added to the server.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def editquote(self, interaction : discord.Interaction):
         await interaction.response.defer()
         serverID = interaction.guild_id
@@ -314,7 +310,6 @@ class Fun(commands.Cog):
 
     #For hangman command
     @app_commands.command(description="Wanna play some hangman? You can bet on it and play with a second player!")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.describe(player2="A member that you wish to play with",bet="The amount of thonks you want to bet")
     async def hangman(self,interaction : discord.Interaction, player2 : Optional[discord.Member], bet : Optional[int]):
         """
@@ -340,7 +335,6 @@ class Fun(commands.Cog):
 #-----------------------------------------------------------
 
     @app_commands.command(description="Let the bot tell you a joke.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def joke(self, interaction : discord.Interaction):
         """
         Let the bot tell you a joke.
@@ -365,7 +359,6 @@ class Fun(commands.Cog):
 
     #For quote command
     @app_commands.command(description="Show a random quote that has been said in this server.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def quote(self, interaction : discord.Interaction):
         """
         Show a random quote that has been said in this server.

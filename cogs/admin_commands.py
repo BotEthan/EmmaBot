@@ -20,7 +20,6 @@ class Admin(commands.Cog):
     #For purge chat
     @app_commands.command(name="clear",description="Clear some messages away.")
     @app_commands.describe(amount="The amount of messages you want to remove.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.checks.has_permissions(administrator=True)
     async def _clear(self, interaction : discord.Interaction, amount : int = 3):
         """
@@ -39,7 +38,6 @@ class Admin(commands.Cog):
     
     #For move members
     @app_commands.command(description="Move a large amount of people to another vc")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.describe(voicechannel="The voice channel you wish to move all to",members="A list of people you specifically want to move")
     @app_commands.checks.has_permissions(administrator=True)
     async def movevoicechannel(self,interaction : discord.Interaction,voicechannel : discord.VoiceChannel,*, members : Optional[str]):

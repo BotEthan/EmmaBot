@@ -16,7 +16,6 @@ class Emotes(commands.Cog):
         print('Cog: "Emote Commands" loaded')
     
     @app_commands.command(description="Let people know you are mad with this command.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.describe(member="A person that you mention")
     async def angry(self, interaction : discord.Interaction, member : Optional[discord.Member]):
         """
@@ -42,7 +41,6 @@ class Emotes(commands.Cog):
 
 
     @app_commands.command(description="Let people know you are blushing with this command.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def blush(self, interaction : discord.Interaction):
         """
         Let people know you are blushing with this command.
@@ -62,7 +60,6 @@ class Emotes(commands.Cog):
 
 
     @app_commands.command(description="Let people know you are confused with this command.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def confused(self,interaction : discord.Interaction):
         """
         Let people know you are confused with this command.
@@ -80,7 +77,6 @@ class Emotes(commands.Cog):
 
 
     @app_commands.command(description="Let people know you are crying with this command.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def cry(self,interaction : discord.Interaction):
         """
         Let people know you are crying with this command.
@@ -98,7 +94,6 @@ class Emotes(commands.Cog):
 
 
     @app_commands.command(description="Let people know you are fighting with someone with this command.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.describe(member="A person that you mention")
     async def hit(self, interaction : discord.Interaction, member : discord.Member):
         """
@@ -122,7 +117,6 @@ class Emotes(commands.Cog):
 
 
     @commands.command(description="Let people know you are hugging someone with this command.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.describe(member="A person that you mention")
     async def hug(self, interaction : discord.Interaction, member : discord.Member):
         """
@@ -145,7 +139,6 @@ class Emotes(commands.Cog):
 
 
     @commands.command(description="Let people know you are laughing with this command.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.describe(member="A person that you mention")
     async def laugh(self, interaction : discord.Interaction, member : Optional[discord.Member]):
         """
@@ -169,7 +162,6 @@ class Emotes(commands.Cog):
 
 
     @app_commands.command(description="Let people know you are thinking lewd thoughts with this command.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.describe(member="A person that you mention")
     async def lewd(self,interaction : discord.Interaction,member : Optional[discord.Member]):
         """
@@ -195,7 +187,6 @@ class Emotes(commands.Cog):
 
 
     @app_commands.command(description="Let people know you are petting someone with this command.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.describe(member="A person that you mention")
     async def pet(self, interaction : discord.Interaction, member : discord.Member):
         """
@@ -222,7 +213,6 @@ class Emotes(commands.Cog):
 
 
     @app_commands.command(description="Let people know you are pouting with this command.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def pout(self,interaction : discord.Interaction):
         """
         Let people know you are pouting with this command.
@@ -241,7 +231,6 @@ class Emotes(commands.Cog):
 
 
     @app_commands.command(description="Let people know you are smiling with this command.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.describe(member="A person that you mention")
     async def smile(self,interaction : discord.Interaction,member : Optional[discord.Member]):
         """
@@ -273,7 +262,6 @@ class Emotes(commands.Cog):
 
 
     @app_commands.command(description="Let people know you are waving with this command.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.describe(member="A person that you mention")
     async def wave(self,interaction : discord.Interaction,member : Optional[discord.Member]):
         """

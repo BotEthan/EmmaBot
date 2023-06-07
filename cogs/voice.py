@@ -73,7 +73,6 @@ class Voice(commands.Cog):
 #-----------------------------------------------------------
 
     @app_commands.command(description="Make Emma join the voice channel")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def join(self, interaction : discord.Interaction):
         await interaction.response.defer()
         embed = await self.join_voice(interaction)
@@ -86,7 +85,6 @@ class Voice(commands.Cog):
 
     #For the leave command
     @app_commands.command(description="Kick Emma out of the voice channel")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def leave(self, interaction : discord.Interaction):
         #Defer the response for a followup to allow time to process
         await interaction.response.defer()
@@ -114,7 +112,6 @@ class Voice(commands.Cog):
 
     #For looping the playlist
     @app_commands.command(description="Toggle looping so that you can hear the same thing over and over.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def loop(self, interaction : discord.Interaction):
         try:
             with self.lock:
@@ -128,7 +125,6 @@ class Voice(commands.Cog):
 
     #For pausing the music
     @app_commands.command(description="Pause the music")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def pause(self,interaction : discord.Interaction):
         #Defer response to process
         await interaction.response.defer()
@@ -146,7 +142,6 @@ class Voice(commands.Cog):
 #-----------------------------------------------------------
 
     @app_commands.command(description="Play something or add it queue")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def play(self,interaction : discord.Interaction, search : str):
         embed = None
         defered = False
@@ -207,7 +202,6 @@ class Voice(commands.Cog):
 
     #For the queue
     @app_commands.command(description="Shows the current queue for the music.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def queue(self, interaction : discord.Interaction):
         await interaction.response.defer()
         with self.lock:
@@ -300,7 +294,6 @@ class Voice(commands.Cog):
 #-----------------------------------------------------------
 
     @app_commands.command(description="Skip the current song")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def skip(self, interaction : discord.Interaction):
         await interaction.response.defer()
         with self.lock:
@@ -319,7 +312,6 @@ class Voice(commands.Cog):
 
     #For resuming the music
     @app_commands.command(description="Resumes the music. Keep the vibes going.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def resume(self,interaction : discord.Interaction):
         with self.lock:
             #Get the outcome of trying to resume the music
@@ -337,7 +329,6 @@ class Voice(commands.Cog):
 
     #For the stop command
     @app_commands.command(description="Stop the music and clear the queue")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def stop(self,interaction : discord.Interaction):
         with self.lock:
             #Call the stop command for the server object and get the embed
@@ -349,7 +340,6 @@ class Voice(commands.Cog):
 
     #For the volume command
     @app_commands.command(description="Change the volume of the bot")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.describe(vol = "The volume you wish it to be set at between 0-200.")
     async def volume(self,interaction : discord.Interaction,vol : int):
         #Deferring response

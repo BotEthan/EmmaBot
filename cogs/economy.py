@@ -47,7 +47,6 @@ class Economy(commands.Cog):
     #For balance commands
     @app_commands.command(description="Shows the current balance of you or another user.")
     @app_commands.describe(member="The user you want the balance of. Leave blank for yourself.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def balance(self, interaction : discord.Interaction, member: Union[None,discord.Member]):
         """
         Shows the current balance of you or another user.
@@ -77,7 +76,6 @@ class Economy(commands.Cog):
     #For beg command
     @app_commands.command(description="Beg for some money.")
     @app_commands.checks.cooldown(rate=1, per=7200)
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def beg(self, interaction : discord.Interaction):
         """
         Beg for some money.
@@ -129,7 +127,6 @@ class Economy(commands.Cog):
 
     #For leaderboard command
     @app_commands.command(description="Shows the leaderboard for the highest amount of thonks")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def leaderboard(self, interaction : discord.Interaction):
         """Check the leaderboard for who has the highest amount of Thonks
         
@@ -169,7 +166,6 @@ class Economy(commands.Cog):
     #For give command
     @app_commands.command(description="Give someone some money. Well aren't you charitable.")
     @app_commands.describe(member="The member you wish to give <:Thonks:768191131820883978> thonks to", amount="The amount of <:Thonks:768191131820883978> thonks to give.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def give(self, interaction : discord.Interaction, member : discord.Member, amount : int):
         """
         Give someone some money. Well aren't you charitable.
@@ -233,7 +229,6 @@ class Economy(commands.Cog):
 
     @app_commands.command(description="Try and steal some money from someone. Ooo he stealin'!")
     @app_commands.describe(member="The member you wish to steal from.")
-    @app_commands.guilds(discord.Object(id = 767324204390809620))
     @app_commands.checks.dynamic_cooldown(factory=StealReset, key=lambda i: (i.guild_id, i.user.id))
     async def steal(self, interaction : discord.Interaction, member : discord.Member):
         """
