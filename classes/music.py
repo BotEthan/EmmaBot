@@ -90,7 +90,8 @@ class ServerMusic():
         embed_added_to_queue = discord.Embed(colour=discord.Colour.green())
         if type(song) == YTSongObject:
             self.visual_queue.append([song.song_name, song.duration, song.added_by])
-            embed_added_to_queue.title = f"Successfully added {song.song_name} to the queue."
+            embed_added_to_queue = discord.Embed(colour=get_image_colour(song.thumbnail),url= song.song_link,title=f"Added `{song.song_name} [{song.duration//60}:{song.duration%60:02d}]` to the queue")
+            embed_added_to_queue.set_thumbnail(url=song.thumbnail)
         else:
             for video in song.videos:
                 self.visual_queue.append([video['title'], video['duration'], song.added_by])

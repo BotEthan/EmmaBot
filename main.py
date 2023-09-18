@@ -126,7 +126,6 @@ async def on_ready():
     ChangeStatus.start()
 
 @client.tree.command(name="help",description="Shows you the command list.")
-@app_commands.guilds(discord.Object(id = 767324204390809620))
 @app_commands.describe(command="The command you wish to know more about")
 async def slashhelp(interaction : discord.Interaction, command : Optional[str]):
     author = interaction.user
@@ -136,7 +135,7 @@ async def slashhelp(interaction : discord.Interaction, command : Optional[str]):
     if not command:
         embedHelp.title = "Here Are The Available Help Commands"
         embedHelp.description = "For more details on a command use `/help {command}`"
-        for loopCommand in client.tree.walk_commands(guild= discord.Object(id = 767324204390809620),type=discord.AppCommandType.chat_input):
+        for loopCommand in client.tree.walk_commands(type=discord.AppCommandType.chat_input):
             if loopCommand.module == "__main__":
                 continue
             if currentModule == "": 

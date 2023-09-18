@@ -19,8 +19,8 @@ class Admin(commands.Cog):
 
     #For purge chat
     @app_commands.command(name="clear",description="Clear some messages away.")
-    @app_commands.describe(amount="The amount of messages you want to remove.")
     @app_commands.guilds(discord.Object(id = 767324204390809620))
+    @app_commands.describe(amount="The amount of messages you want to remove.")
     @app_commands.checks.has_permissions(administrator=True)
     async def _clear(self, interaction : discord.Interaction, amount : int = 3):
         """

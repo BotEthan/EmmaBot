@@ -50,8 +50,8 @@ class TwitchYoutube(commands.Cog):
 #-----------------------------------------------------------
 
     @app_commands.command(description="Add a Youtube channel to be notified about")
-    @app_commands.describe(send_channel="The channel to send the notification to", channel_link="The link to the channel. Only Youtube or Twitch", notification_message="The message to send. Use '{author}' to send the name of the channel")
     @app_commands.guilds(discord.Object(id = 767324204390809620))
+    @app_commands.describe(send_channel="The channel to send the notification to", channel_link="The link to the channel. Only Youtube or Twitch", notification_message="The message to send. Use '{author}' to send the name of the channel")
     async def addchannel(self, interaction : discord.Interaction, send_channel : discord.TextChannel, channel_link : str, notification_message : str):
         print("youtube" in channel_link)
         if "youtube" in channel_link or "youtu.be" in channel_link or "twitch.tv" in channel_link:

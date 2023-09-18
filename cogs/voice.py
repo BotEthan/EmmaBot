@@ -1,4 +1,5 @@
 import asyncio
+import shutil
 import asqlite
 from math import ceil
 from typing import Optional
@@ -20,6 +21,7 @@ class Voice(commands.Cog):
         self.lock = threading.Lock()
         self.servers_dict = {}
         self.amount_per_page = 5
+        clear_downloaded_music()
 
     async def join_voice(self, interaction : discord.Interaction):
         if interaction.user.voice.channel == None:
@@ -145,6 +147,7 @@ class Voice(commands.Cog):
             
 #-----------------------------------------------------------
 
+    #For playing music
     @app_commands.command(description="Play something or add it queue")
     @app_commands.guilds(discord.Object(id = 767324204390809620))
     async def play(self,interaction : discord.Interaction, search : str):
@@ -163,16 +166,16 @@ class Voice(commands.Cog):
         #If there is an embed returned meaning it joined the channel send the embed
         if not embed == None:
             await interaction.response.send_message(embed=embed)
+            defered = True
         #If there was no embed returned
         else:
-            await interaction.response.defer()
-            defered = True
+            defered = False
             
         #Check what the search type is
         if "playlist" in search or "&list" in search:
             #Create a playlist unwrapper object to add all of the songs to the queue
             embed = YTPlaylistUnwrapper(search,self.servers_dict[str(interaction.guild.id)],interaction.user).embed_amount_added
-            if not defered:
+            if defered:
                 #Send an embed to the channel stating how many songs were added
                 await interaction.followup.send(embed=embed)
             else:
@@ -185,7 +188,8 @@ class Voice(commands.Cog):
             #Add a song object to the server's queue
             embed = self.servers_dict[str(interaction.guild.id)].add_to_queue(YTSongObject(search, interaction.user, str(interaction.guild.id)))
             print(f"Visual Queue length: {len(self.servers_dict[str(interaction.guild.id)].visual_queue)}")
-            if not defered:
+            print(f"LOG: Defered:{defered}")
+            if defered:
                 #If there are songs in the queue already then say the songs been added to the queue
                 if len(self.servers_dict[str(interaction.guild.id)].visual_queue) > 1:
                     await interaction.followup.send(embed=embed)
@@ -361,6 +365,20 @@ class Voice(commands.Cog):
             return
         #Changing volume and printing response
         await interaction.followup.send(embed=self.servers_dict[str(interaction.guild.id)].change_volume(vol))
+
+#-----------------------------------------------------------
+    
+    def clear_downloaded_music():
+        folder = './music_queues/'
+        for filename in os.listdir(folder):
+            file_path = os.path.join(folder, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print('Failed to delete %s. Reason: %s' % (file_path, e))      
 
 async def setup(client):
     await client.add_cog(Voice(client))

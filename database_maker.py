@@ -1,7 +1,7 @@
 import sqlite3
 
-# connection = sqlite3.connect("./databases/temp_quotes.db")
-# c = connection.cursor()
+connection = sqlite3.connect("./databases/server_quotes.db")
+c = connection.cursor()
 
 # c.execute("""INSERT INTO music_settings VALUES(518721840865214484,100,0,?)""",(None,))
 # c.execute("""DROP TABLE a767324204390809620""")
@@ -51,7 +51,7 @@ import sqlite3
 #     for quote in results:
 #         c.execute("INSERT INTO quotes VALUES (?, ?, ?, ?)", (quote[0], quote[1], quote[2], None))
 
-
-    connection.commit()
+c.execute("""DELETE FROM reactions WHERE role_id = 1115986688527839243""")
+connection.commit()
 
 # connection.close()
