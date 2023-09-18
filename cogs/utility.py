@@ -255,12 +255,9 @@ class Utility(commands.Cog):
                     await user.add_roles(role)
                     if results[4]:
                         print(results[4])
-                        print(user.nick)
+                        print(user.display_name)
                         print(discord.Permissions.manage_nicknames)
-                        if user.nick == None:
-                            nickname = user.name
-                        else:
-                            nickname = user.nick
+                        nickname = user.display_name
                         print(nickname)
                         await user.edit(nick=f"{results[4]} {nickname}")
                     if results[5]:
